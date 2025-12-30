@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sea — In-Browser C Compiler</title>
+    
+    <!-- Cross-Origin Isolation for SharedArrayBuffer (required by Wasmer SDK) -->
+    <!-- This must be loaded before any other scripts -->
+    <script>
+        // Configure coi-serviceworker to use credentialless COEP (more permissive)
+        window.coi = {
+            coepCredentialless: () => true,
+            coepDegrade: () => true,
+            quiet: false
+        };
+    </script>
+    <script src="./coi-serviceworker.js"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loading">
+        <div class="loader"></div>
+        <div class="loading-text" id="loading-text">Initializing Sea...</div>
+        <div class="loading-subtext" id="loading-subtext">Loading Monaco Editor</div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <div class="logo-icon">C</div>
+                <span class="logo-text">Sea</span>
+                <span class="logo-badge">Clang + WASM</span>
+            </div>
+            
+            <div class="header-center">
+                <div class="file-indicator">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <path d="M14 2v6h6"/>
+                    </svg>
+                    main.c
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <div class="dropdown-container">
+                    <button class="btn btn-secondary" id="examples-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                        </svg>
+                        Examples
+                    </button>
+                    <div class="dropdown-menu" id="examples-dropdown">
+                        <div class="dropdown-item" data-example="hello">
+                            <div class="dropdown-item-title">Hello World</div>
+                            <div class="dropdown-item-desc">Basic printf example</div>
+                        </div>
+                        <div class="dropdown-item" data-example="fibonacci">
+                            <div class="dropdown-item-title">Fibonacci</div>
+                            <div class="dropdown-item-desc">Recursive function</div>
+                        </div>
+                        <div class="dropdown-item" data-example="factorial">
+                            <div class="dropdown-item-title">Factorial</div>
+                            <div class="dropdown-item-desc">Iterative &amp; recursive</div>
+                        </div>
+                        <div class="dropdown-item" data-example="arrays">
+                            <div class="dropdown-item-title">Arrays &amp; Sorting</div>
+                            <div class="dropdown-item-desc">Bubble sort implementation</div>
+                        </div>
+                        <div class="dropdown-item" data-example="structs">
+                            <div class="dropdown-item-title">Structures</div>
+                            <div class="dropdown-item-desc">Struct definitions and usage</div>
+                        </div>
+                        <div class="dropdown-item" data-example="pointers">
+                            <div class="dropdown-item-title">Pointers</div>
+                            <div class="dropdown-item-desc">Pointer manipulation</div>
+                        </div>
+                        <div class="dropdown-item" data-example="strings">
+                            <div class="dropdown-item-title">String Operations</div>
+                            <div class="dropdown-item-desc">String library functions</div>
+                        </div>
+                        <div class="dropdown-item" data-example="math">
+                            <div class="dropdown-item-title">Math Functions</div>
+                            <div class="dropdown-item-desc">Using math.h</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn btn-secondary" id="clear-btn" title="Clear console (Ctrl+L)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                    </svg>
+                    Clear
+                </button>
+
+                <button class="btn btn-primary" id="run-btn" title="Run (Ctrl+Enter)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="5 3 19 12 5 21 5 3"/>
+                    </svg>
+                    Run
+                </button>
+            </div>
+        </header>
+
+        <!-- Main content -->
+        <div class="main-content">
+            <!-- Editor panel -->
+            <div class="editor-panel">
+                <div id="editor-container"></div>
+            </div>
+
+            <!-- Output panel -->
+            <div class="output-panel">
+                <div class="output-header">
+                    <div class="output-title">
+                        <span class="status-dot" id="status-dot"></span>
+                        <span id="output-label">Console</span>
+                    </div>
+                    <button class="btn btn-icon btn-secondary" id="clear-output-btn" title="Clear output">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="console-output" id="console-output"></div>
+                <div class="input-area">
+                    <input type="text" class="input-field" id="stdin-input" placeholder="Program input (stdin)..." />
+                    <button class="btn btn-secondary" id="send-input-btn">Send</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status bar -->
+        <div class="status-bar">
+            <div class="status-left">
+                <span class="status-item" id="compiler-status">
+                    <span>Compiler:</span>
+                    <span id="compiler-status-text">Loading...</span>
+                </span>
+            </div>
+            <div class="status-right">
+                <span class="status-item">
+                    <span>Powered by Wasmer + Clang</span>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>
