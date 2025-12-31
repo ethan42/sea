@@ -33,10 +33,6 @@ export default defineConfig({
         {
           src: 'node_modules/coi-serviceworker/coi-serviceworker.js',
           dest: '.'
-        },
-        {
-          src: 'node_modules/@wasmer/sdk/dist/wasmer_js_bg.wasm',
-          dest: 'assets'
         }
       ]
     }),
@@ -45,31 +41,37 @@ export default defineConfig({
       name: 'serve-node-modules-files',
       configureServer(server) {
         server.middlewares.use((req, res, next) => {
-          if (req.url === '/coi-serviceworker.js') {
-            const filePath = path.resolve(__dirname, 'node_modules/coi-serviceworker/coi-serviceworker.js');
-            res.setHeader('Content-Type', 'application/javascript');
+          if (req.url?.includes('webc')) {
+            const filePath = path.resolve(__dirname, 'public/clang/clang.webc');
+            res.setHeader('Content-Type', 'application/webc');
             fs.createReadStream(filePath).pipe(res);
             return;
           }
+          // if (req.url === '/coi-serviceworker.js') {
+          //   const filePath = path.resolve(__dirname, 'node_modules/coi-serviceworker/coi-serviceworker.js');
+          //   res.setHeader('Content-Type', 'application/javascript');
+          //   fs.createReadStream(filePath).pipe(res);
+          //   return;
+          // }
           // Serve wasmer WASM file with correct MIME type
-          if (req.url?.includes('wasmer_js_bg.wasm')) {
-            const filePath = path.resolve(__dirname, 'node_modules/@wasmer/sdk/dist/wasmer_js_bg.wasm');
-            res.setHeader('Content-Type', 'application/wasm');
-            fs.createReadStream(filePath).pipe(res);
-            return;
-          }
+          // if (req.url?.includes('wasmer_js_bg.wasm')) {
+          //   const filePath = path.resolve(__dirname, 'node_modules/@wasmer/sdk/dist/wasmer_js_bg.wasm');
+          //   res.setHeader('Content-Type', 'application/wasm');
+          //   fs.createReadStream(filePath).pipe(res);
+          //   return;
+          // }
           next();
         });
       }
     }
   ],
-  
+
   // Required for SharedArrayBuffer (Wasmer SDK)
   // Using 'credentialless' instead of 'require-corp' to allow cross-origin fetches
   server: {
     headers: {
       'Cross-Origin-Opener-Policy': 'same-origin',
-      'Cross-Origin-Embedder-Policy': 'credentialless',
+      'Cross-Origin-Embedder-Policy': 'require-corp',
     },
     proxy: {
       // Proxy Wasmer registry to avoid CORS issues in dev
@@ -86,7 +88,7 @@ export default defineConfig({
       },
     },
   },
-  
+
   preview: {
     headers: {
       'Cross-Origin-Opener-Policy': 'same-origin',
@@ -99,7 +101,7 @@ export default defineConfig({
     include: ['monaco-editor'],
     exclude: ['@wasmer/sdk']
   },
-  
+
   // Worker configuration for Monaco
   worker: {
     format: 'es'

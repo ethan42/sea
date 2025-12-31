@@ -1,67 +1,65 @@
 #!/usr/bin/env node
-// Downloads clang WASM package from Wasmer registry at build time
+// Downloads wasm-clang assets from binji.github.io
 
-import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync, readFileSync } from 'fs';
 import { join } from 'path';
 
-const CLANG_DIR = 'public/clang';
-const WEBC_FILE = join(CLANG_DIR, 'clang.webc');
+const BASE_URL = 'https://binji.github.io/wasm-clang';
+const PUBLIC_DIR = 'public/wasm-clang';
 
-async function getPackageUrl() {
-    // Query the Wasmer GraphQL API to get the download URL
-    const query = `
-        query {
-            getPackage(name: "clang/clang") {
-                lastVersion {
-                    distribution {
-                        downloadUrl
-                    }
-                }
-            }
-        }
-    `;
+const ASSETS = [
+    'clang',           // clang compiler (wasm)
+    'lld',             // lld linker (wasm)  
+    'memfs',           // in-memory filesystem (wasm)
+    'sysroot.tar',     // C/C++ headers and libraries
+    'shared.js',       // shared utilities
+    'worker.js',       // web worker for compilation
+];
 
-    const response = await fetch('https://registry.wasmer.io/graphql', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query })
-    });
-
-    const data = await response.json();
-    return data.data.getPackage.lastVersion.distribution.downloadUrl;
-}
-
-async function downloadClang() {
-    console.log('Checking for clang package...');
+async function downloadFile(filename) {
+    const url = `${BASE_URL}/${filename}`;
+    const destPath = join(PUBLIC_DIR, filename);
     
-    if (existsSync(WEBC_FILE)) {
-        console.log('✓ Clang package already exists at', WEBC_FILE);
-        console.log('  Delete it to re-download.');
+    if (existsSync(destPath)) {
+        console.log(`  ✓ ${filename} (cached)`);
         return;
     }
-
-    mkdirSync(CLANG_DIR, { recursive: true });
-
-    console.log('Fetching download URL from Wasmer registry...');
-    const downloadUrl = await getPackageUrl();
-    console.log('Download URL:', downloadUrl);
     
-    console.log('\nDownloading clang package (~100MB)...');
-    console.log('This may take a few minutes...\n');
+    console.log(`  ↓ Downloading ${filename}...`);
     
-    const response = await fetch(downloadUrl);
+    const response = await fetch(url);
     if (!response.ok) {
-        throw new Error(`Download failed: ${response.status}`);
+        throw new Error(`Failed to download ${filename}: ${response.status}`);
     }
     
     const buffer = await response.arrayBuffer();
-    writeFileSync(WEBC_FILE, Buffer.from(buffer));
+    writeFileSync(destPath, Buffer.from(buffer));
     
-    console.log('✓ Clang package downloaded to', WEBC_FILE);
-    console.log('  Size:', (buffer.byteLength / 1024 / 1024).toFixed(1), 'MB');
+    const sizeMB = (buffer.byteLength / 1024 / 1024).toFixed(2);
+    console.log(`    Downloaded ${sizeMB} MB`);
 }
 
-downloadClang().catch(err => {
+async function main() {
+    console.log('Setting up wasm-clang assets...\n');
+    
+    // Create directory
+    mkdirSync(PUBLIC_DIR, { recursive: true });
+    
+    // Download main assets
+    console.log('Downloading from binji.github.io/wasm-clang:');
+    for (const asset of ASSETS) {
+        try {
+            await downloadFile(asset);
+        } catch (err) {
+            console.error(`  ✗ Failed to download ${asset}: ${err.message}`);
+        }
+    }
+    
+    console.log('\n✓ Assets downloaded!');
+    console.log(`\nRun 'npm run dev' to start the development server.`);
+}
+
+main().catch(err => {
     console.error('Error:', err.message);
     process.exit(1);
 });
