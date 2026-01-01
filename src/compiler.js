@@ -4,50 +4,48 @@
 let WasmerSDK = null;
 let clangPackage = null;
 let wasmerInitialized = false;
+let compilerWorker = null;
 
 export async function initCompiler(log, setStatus, progressBar, loadingText, loadingSubtext, compilerStatus) {
-    try {
-        loadingSubtext.textContent = 'Loading Wasmer SDK...';
-        progressBar.style.width = '30%';
-        // const wasmerModule = await import('@wasmer/sdk');
-        // const { init, Wasmer, Directory } = wasmerModule;
-        // loadingSubtext.textContent = 'Initializing Wasmer runtime...';
-        // progressBar.style.width = '50%';
-        // await init({ module: wasmerSDKModule });
-        loadingSubtext.textContent = 'Loading Clang compiler...';
-        loadingText.textContent = 'Loading Clang...';
-        progressBar.style.width = '60%';
-        // WasmerSDK = { Wasmer, Directory };
-        // try {
-        //     const response = await fetch('/clang/clang.webc');
-        //     if (!response.ok) throw new Error('Local clang not found');
-        //     const bytes = new Uint8Array(await response.arrayBuffer());
-        //     clangPackage = await WasmerSDK.Wasmer.fromFile(bytes);
-        //     log('Loaded clang from local package', 'system');
-        // } catch (e) {
-        //     log('Local clang not found, fetching from registry...', 'warning');
-        //     clangPackage = await WasmerSDK.Wasmer.fromRegistry('clang/clang');
-        // }
-        loadingSubtext.textContent = 'Finalizing setup...';
-        progressBar.style.width = '100%';
-        loadingSubtext.textContent = 'Ready!';
-        wasmerInitialized = true;
-        compilerStatus.textContent = 'Clang (Ready)';
-        compilerStatus.style.color = '#3fb950';
-        log('Sea initialized successfully!', 'success');
-        log('Compiler: Clang via Wasmer SDK (WebAssembly)', 'system');
-        log('This is a FULL C compiler - supports stdio.h, math.h, string.h, etc.', 'system');
-        log('Press Ctrl+Enter to compile and run your code.', 'system');
-    } catch (error) {
-        compilerStatus.textContent = 'Error';
-        compilerStatus.style.color = '#f85149';
-        log(`Failed to initialize compiler: ${error.message}`, 'stderr');
-        log('', 'system');
-        log('Troubleshooting:', 'warning');
-        log('1. Make sure you are using npm run dev (not opening HTML directly)', 'system');
-        log('2. Check that the page reloaded to activate the service worker', 'system');
-        log('3. Try refreshing the page', 'system');
+    loadingSubtext.textContent = 'Loading wasm-clang compiler...';
+    progressBar.style.width = '30%';
+    loadingText.textContent = 'Setting up clang';
+    wasmerInitialized = true;
+    compilerStatus.textContent = 'Clang (Ready)';
+    compilerStatus.style.color = '#3fb950';
+    return;
+    // Only create the worker once
+    if (!compilerWorker) {
+        compilerWorker = new Worker('/wasm-clang/worker.js');
     }
+    return new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+            reject(new Error('Compiler initialization timed out (20s)'));
+        }, 20000);
+        function handleReady(e) {
+            const data = e.data;
+            if (data.type === 'ready') {
+                clearTimeout(timeout);
+                wasmerInitialized = true;
+                compilerStatus.textContent = 'Clang (Ready)';
+                compilerStatus.style.color = '#3fb950';
+                compilerWorker.removeEventListener('message', handleReady);
+                resolve();
+            } else if (data.type === 'write') {
+                if (data.text) {
+                    log(data.text.replace(/\n$/, ''), 'stdout');
+                }
+            }
+        }
+        compilerWorker.addEventListener('message', handleReady);
+        compilerWorker.onerror = (err) => {
+            clearTimeout(timeout);
+            compilerWorker.removeEventListener('message', handleReady);
+            reject(new Error(`Worker error: ${err.message || 'Unknown error'}`));
+        };
+        loadingSubtext.textContent = 'Initializing Clang compiler (~30MB download)...';
+        progressBar.style.width = '60%';
+    });
 }
 
 export function getWasmerSDK() {
