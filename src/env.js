@@ -78,6 +78,7 @@ export async function initCompiler(log, setStatus, progressBar, loadingText, loa
     compilerStatus.textContent = 'Clang (Ready)';
     compilerStatus.style.color = '#3fb950';
     setStatus('ready');
+    log('Sea compiler is ready!', 'success');
     return;
 }
 
@@ -86,17 +87,17 @@ export async function runCode(log, setStatus, runBtn, stdinInput) {
     setStatus('running');
     const editor = getEditor();
     const code = editor.getValue();
-    log('─'.repeat(50), 'system');
-    log('Compiling...', 'info');
+    // log('─'.repeat(50), 'system');
+    // log('Compiling...', 'info');
     try {
         env.terminal = log;
         let result = await env.compileLinkRun(code);
         console.log(result);
-        log('Program output:', 'info');
-        log('─'.repeat(50), 'system');
-        log(result, 'stdout');
-        log('─'.repeat(50), 'system');
-        log(`Program finished execution`, 'success');
+        // log('Program output:', 'info');
+        // log('─'.repeat(50), 'system');
+        // log(result, 'stdout');
+        // log('─'.repeat(50), 'system');
+        // log(`Program finished execution`, 'success');
         setStatus('ready');
     } catch (error) {
         log(`Error: ${error.message}`, 'stderr');

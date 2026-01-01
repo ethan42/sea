@@ -189,9 +189,9 @@ header {
 
 /* Output panel */
 .output-panel {
-    width: 40%;
+    width: 50%;
     min-width: 320px;
-    max-width: 550px;
+    max-width: 768px;
     display: flex;
     flex-direction: column;
     background: var(--bg-secondary);
