@@ -65,9 +65,19 @@ export async function initCompiler(log, setStatus, progressBar, loadingText, loa
     loadingSubtext.textContent = 'Loading wasm-clang compiler...';
     progressBar.style.width = '30%';
     loadingText.textContent = 'Setting up clang';
-    env = new InBrowserEnvironment(log);
+    const devnull = (msg, type) => {};
+    env = new InBrowserEnvironment(devnull);
+    progressBar.style.width = '40%';
+    loadingText.textContent = 'Initializing runtime';
+    // compile a small test program to warm up
+    loadingSubtext.textContent = 'Trying a test run...';
+    const testCode = 'int main() { return 0; }';
+    await env.compileLinkRun(testCode);
+    progressBar.style.width = '100%';
+    loadingText.textContent = 'Ready!';
     compilerStatus.textContent = 'Clang (Ready)';
     compilerStatus.style.color = '#3fb950';
+    setStatus('ready');
     return;
 }
 
@@ -79,6 +89,7 @@ export async function runCode(log, setStatus, runBtn, stdinInput) {
     log('─'.repeat(50), 'system');
     log('Compiling...', 'info');
     try {
+        env.terminal = log;
         let result = await env.compileLinkRun(code);
         console.log(result);
         log('Program output:', 'info');
