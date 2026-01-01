@@ -15,6 +15,9 @@ class InBrowserEnvironment {
         this.worker.postMessage({ id: 'constructor', data: remotePort },
             [remotePort]);
         this.terminal = terminal;
+        this.setShowTiming(true);
+        this.skip_newlines = false;
+        this.in_compiling = false;
     }
 
     setShowTiming(value) {
@@ -42,6 +45,28 @@ class InBrowserEnvironment {
         console.log(event);
         switch (event.data.id) {
             case 'write':
+                // Workaround for noisy wasm-clang output
+                if (event.data.data.includes('Compiling test.wasm')) {
+                    this.in_compiling = true;
+                    return;
+                } else {
+                    if (this.in_compiling) {
+                        if (event.data.data !== '\n') {
+                            return;
+                        }
+                        this.in_compiling = false;
+                    }
+                }
+                if (this.skip_newlines && event.data.data === '\n') {
+                    return;
+                }
+                if (event.data.data.includes('clang -cc1') || event.data.data.includes('wasm-ld')) {
+                    this.skip_newlines = true;
+                } else {
+                    this.skip_newlines = false;
+                }
+                // Workaround ends here
+
                 this.terminal(event.data.data, 'stdout');
                 break;
 
@@ -87,17 +112,10 @@ export async function runCode(log, setStatus, runBtn, stdinInput) {
     setStatus('running');
     const editor = getEditor();
     const code = editor.getValue();
-    // log('─'.repeat(50), 'system');
-    // log('Compiling...', 'info');
+    log('Compiling and running...', 'system');
     try {
         env.terminal = log;
-        let result = await env.compileLinkRun(code);
-        console.log(result);
-        // log('Program output:', 'info');
-        // log('─'.repeat(50), 'system');
-        // log(result, 'stdout');
-        // log('─'.repeat(50), 'system');
-        // log(`Program finished execution`, 'success');
+        await env.compileLinkRun(code);
         setStatus('ready');
     } catch (error) {
         log(`Error: ${error.message}`, 'stderr');
