@@ -1,5 +1,10 @@
 node_modules/
 dist/
-public/clang/
+public/clang
+public/lld
+public/shared.js
+public/sysroot.tar
+public/worker.js
+public/memfs
 .DS_Store
 *.log
