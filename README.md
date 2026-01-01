@@ -1,6 +1,6 @@
 # Sea — In-Browser C Compiler: What you sea is what you get!
 
-A fully-featured C code editor and compiler that runs entirely in your browser. Uses Monaco Editor and Clang compiled to WebAssembly via Wasmer SDK.
+A fully-featured C code editor and compiler that runs entirely in your browser. Uses Monaco Editor and Clang compiled to WebAssembly via [binji/wasm-clang](https://github.com/binji/wasm-clang).
 
 ## Quick Start
 
@@ -118,7 +118,7 @@ npm run build
 
 1. Your C code is written to a virtual filesystem
 2. Clang (compiled to WASM) compiles it to WebAssembly
-3. The resulting WASM is executed via Wasmer runtime
+3. The resulting WASM is executed within your browser
 4. Output is displayed in the console
 
 ## First Load
