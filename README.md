@@ -5,7 +5,7 @@ A fully-featured C code editor and compiler that runs entirely in your browser. 
 ## Quick Start
 
 ```bash
-# Install dependencies and download clang (~100MB, one-time)
+# Install dependencies and download clang (~30MB, one-time)
 npm run setup
 
 # Development server (with hot reload)
@@ -26,31 +26,6 @@ The `npm run setup` command:
 
 The clang package is downloaded once and cached locally. This avoids CORS issues and makes the app work offline.
 
-To re-download clang:
-```bash
-rm -rf public/*
-npm run setup
-```
-
-## Project Structure
-
-```
-sea/
-├── package.json          # Dependencies and scripts
-├── vite.config.js        # Build configuration
-├── index.html            # Entry point
-├── scripts/
-│   └── download-clang.js # Downloads clang at setup time
-├── public/
-│   └── clang/            # Downloaded clang package (gitignored)
-└── src/
-    ├── main.js           # Application logic
-    ├── style.css         # Styles
-    └── examples.js       # C code examples
-```
-
-All dependencies are managed via npm.
-
 ## Building for Production
 
 ```bash
@@ -66,7 +41,7 @@ Upload the entire `dist/` folder to any static host.
 ## Deployment
 
 ### GitHub Pages / Netlify / Vercel
-Just upload the `dist/` folder. The service worker handles COOP/COEP headers automatically.
+Just upload the `dist/` folder.
 
 ### Traditional Web Server
 For best performance, configure your server to send these headers:
@@ -85,7 +60,6 @@ All dependencies are managed via npm and bundled at build time:
 |---------|---------|
 | `monaco-editor` | VS Code-quality code editor |
 | `vite` | Fast build tool and dev server |
-| `vite-plugin-static-copy` | Copies service worker to dist |
 
 ## Updating Dependencies
 
@@ -108,7 +82,7 @@ npm run build
 ## Features
 
 - **Full C Compiler**: Real Clang compiler, not an interpreter
-- **Standard Library**: stdio.h, stdlib.h, string.h, math.h, etc.
+- **Standard Library**: stdio.h, stdlib.h, string.h etc.
 - **Monaco Editor**: Syntax highlighting, auto-indent, keyboard shortcuts
 - **8 Example Programs**: Learn C with built-in examples
 - **Stdin Support**: Provide input to your programs
@@ -123,7 +97,7 @@ npm run build
 
 ## First Load
 
-On first load, the browser downloads the Clang compiler (~100MB). This is cached by the browser for subsequent visits.
+On first load, the browser downloads the Clang compiler (~30MB). This is cached by the browser for subsequent visits.
 
 ## Browser Requirements
 
