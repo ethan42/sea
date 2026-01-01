@@ -28,49 +28,29 @@ class InBrowserEnvironment {
         this.worker.terminate();
     }
 
-    async runAsync(id, options) {
+    runAsync(id, options) {
         const responseId = this.nextResponseId++;
         const responsePromise = new Promise((resolve, reject) => {
             this.responseCBs.set(responseId, { resolve, reject });
         });
         this.port.postMessage({ id, responseId, data: options });
-        return await responsePromise;
+        return responsePromise;
     }
 
     compileLinkRun(contents) {
-        this.port.postMessage({ id: 'compileLinkRun', data: contents });
+        // this.port.postMessage({ id: 'compileLinkRun', data: contents });
+        return this.runAsync('compileLinkRun', contents);
     }
 
     onmessage(event) {
-        console.log(event);
         switch (event.data.id) {
             case 'write':
-                // Workaround for noisy wasm-clang output
-                if (event.data.data.includes('Compiling test.wasm')) {
-                    this.in_compiling = true;
-                    return;
-                } else {
-                    if (this.in_compiling) {
-                        if (event.data.data !== '\n') {
-                            return;
-                        }
-                        this.in_compiling = false;
-                    }
-                }
-                if (this.skip_newlines && event.data.data === '\n') {
-                    return;
-                }
-                if (event.data.data.includes('clang -cc1') || event.data.data.includes('wasm-ld')) {
-                    this.skip_newlines = true;
-                } else {
-                    this.skip_newlines = false;
-                }
-                // Workaround ends here
-
+                // console.log(event.data.data);
                 this.terminal(event.data.data, 'stdout');
                 break;
 
             case 'runAsync': {
+                // console.log(event);
                 const responseId = event.data.responseId;
                 const promise = this.responseCBs.get(responseId);
                 if (promise) {
@@ -85,8 +65,9 @@ class InBrowserEnvironment {
 
 let env = null;
 
-export async function initCompiler(log, setStatus, progressBar, loadingText, loadingSubtext, compilerStatus) {
+export async function initCompiler(log, setStatus, progressBar, loadingText, loadingSubtext, compilerStatus, runBtn) {
     if (env) return;
+    runBtn.disabled = true;
     loadingSubtext.textContent = 'Loading wasm-clang compiler...';
     progressBar.style.width = '30%';
     loadingText.textContent = 'Setting up clang';
@@ -104,6 +85,7 @@ export async function initCompiler(log, setStatus, progressBar, loadingText, loa
     compilerStatus.style.color = '#3fb950';
     setStatus('ready');
     log('Sea compiler is ready!', 'success');
+    runBtn.disabled = false;
     return;
 }
 

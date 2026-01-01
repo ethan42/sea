@@ -133,7 +133,7 @@ document.addEventListener('keydown', e => {
         elements.loadingSubtext.textContent = 'Loading Editor...';
         initMonaco(runIt, clearConsole);
         elements.progressBar.style.width = '25%';
-        await initCompiler(log, setStatus, elements.progressBar, elements.loadingText, elements.loadingSubtext, elements.compilerStatus);
+        await initCompiler(log, setStatus, elements.progressBar, elements.loadingText, elements.loadingSubtext, elements.compilerStatus, elements.runBtn);
         setTimeout(() => elements.loadingOverlay.classList.add('hidden'), 500);
     } catch (error) {
         elements.loadingText.textContent = 'Initialization Error';

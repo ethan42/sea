@@ -4,7 +4,7 @@
 import { existsSync, mkdirSync, writeFileSync, readFileSync } from 'fs';
 import { join } from 'path';
 
-const BASE_URL = 'https://binji.github.io/wasm-clang';
+const BASE_URL = 'https://raw.githubusercontent.com/ethan42/wasm-clang/refs/heads/master';
 const PUBLIC_DIR = 'public/';
 
 const ASSETS = [

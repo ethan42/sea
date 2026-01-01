@@ -33,7 +33,6 @@ let editor = null;
 // Configure Monaco workers for Vite - required to run compiler / other jobs in workers
 self.MonacoEnvironment = {
     getWorker: function () {
-        console.log('Creating editor worker');
         return new editorWorker();
     }
 };
