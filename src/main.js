@@ -2,7 +2,7 @@
 import './style.css';
 import { EXAMPLES } from './examples.js';
 import { initMonaco, getEditor } from './editor.js';
-import { initCompiler, runCode as runCompileAndRun } from './compileRun.js';
+import { initCompiler, runCode } from './env.js';
 
 // ============================================
 // DOM ELEMENTS
@@ -54,17 +54,17 @@ const setStatus = status => {
 // ============================================
 // EVENT HANDLERS
 // ============================================
-const runCode = async () => {
+const runIt = async () => {
     if (isRunning) return;
     isRunning = true;
     try {
-        await runCompileAndRun(log, setStatus, elements.runBtn, elements.stdinInput);
+        await runCode(log, setStatus, elements.runBtn, elements.stdinInput);
     } finally {
         isRunning = false;
     }
 };
 
-elements.runBtn.addEventListener('click', runCode);
+elements.runBtn.addEventListener('click', runIt);
 elements.clearBtns.forEach(btn => btn.addEventListener('click', clearConsole));
 
 elements.examplesBtn.addEventListener('click', e => {
@@ -108,7 +108,7 @@ document.addEventListener('keydown', e => {
     try {
         elements.progressBar.style.width = '10%';
         elements.loadingSubtext.textContent = 'Loading Editor...';
-        initMonaco(runCode, clearConsole);
+        initMonaco(runIt, clearConsole);
         elements.progressBar.style.width = '25%';
         await initCompiler(log, setStatus, elements.progressBar, elements.loadingText, elements.loadingSubtext, elements.compilerStatus);
         setTimeout(() => elements.loadingOverlay.classList.add('hidden'), 500);

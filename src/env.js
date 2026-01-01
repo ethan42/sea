@@ -52,6 +52,7 @@ class InBrowserEnvironment {
     }
 
     onmessage(event) {
+        console.log(event);
         switch (event.data.id) {
             case 'write':
                 this.terminal(event.data.data, 'stdout');
