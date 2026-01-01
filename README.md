@@ -22,14 +22,14 @@ npm run preview
 
 The `npm run setup` command:
 1. Installs npm dependencies
-2. Downloads the Clang compiler package (~100MB) to `public/clang/`
+2. Downloads the Clang compiler package (~30MB) to `public/`
 
 The clang package is downloaded once and cached locally. This avoids CORS issues and makes the app work offline.
 
 To re-download clang:
 ```bash
-rm -rf public/clang
-npm run download-clang
+rm -rf public/*
+npm run setup
 ```
 
 ## Project Structure
@@ -49,7 +49,7 @@ sea/
     └── examples.js       # C code examples
 ```
 
-All dependencies (including coi-serviceworker) are managed via npm.
+All dependencies are managed via npm.
 
 ## Building for Production
 
@@ -59,7 +59,6 @@ npm run build
 
 This creates a `dist/` folder containing:
 - `index.html`
-- `coi-serviceworker.js`
 - `assets/` (bundled JS/CSS)
 
 Upload the entire `dist/` folder to any static host.
@@ -85,8 +84,6 @@ All dependencies are managed via npm and bundled at build time:
 | Package | Purpose |
 |---------|---------|
 | `monaco-editor` | VS Code-quality code editor |
-| `@wasmer/sdk` | WebAssembly runtime for running Clang |
-| `coi-serviceworker` | Enables Cross-Origin Isolation headers |
 | `vite` | Fast build tool and dev server |
 | `vite-plugin-static-copy` | Copies service worker to dist |
 

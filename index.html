@@ -6,18 +6,6 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <title>Sea — In-Browser C Compiler</title>
 
-    <!-- Cross-Origin Isolation for SharedArrayBuffer (required by Wasmer SDK) -->
-    <!-- This must be loaded before any other scripts -->
-    <script>
-        // Configure coi-serviceworker to use credentialless COEP (more permissive)
-        window.coi = {
-            coepCredentialless: () => true,
-            coepDegrade: () => true,
-            quiet: false
-        };
-    </script>
-    <script src="./coi-serviceworker.js"></script>
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">

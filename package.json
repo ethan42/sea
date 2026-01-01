@@ -11,12 +11,10 @@
     "setup": "npm install && npm run download-clang"
   },
   "dependencies": {
-    "coi-serviceworker": "^0.1.7",
     "monaco-editor": "^0.52.0"
   },
   "devDependencies": {
     "vite": "^6.0.0",
-    "vite-plugin-static-copy": "^2.2.0",
     "vite-plugin-top-level-await": "^1.4.4",
     "vite-plugin-wasm": "^3.3.0"
   },
