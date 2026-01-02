@@ -84,6 +84,14 @@ export function initMonaco(runCode: () => void, clearConsole: () => void): void 
         return 14;
     };
 
+    // Responsive word wrap column based on screen width
+    const getWordWrapColumn = (): number => {
+        const width = window.innerWidth;
+        if (width <= 480) return 50;
+        if (width <= 768) return 55;
+        return 80;
+    };
+
     editor = monaco.editor.create(editorContainer, {
         value: initialCode,
         language: 'c',
@@ -97,8 +105,7 @@ export function initMonaco(runCode: () => void, clearConsole: () => void): void 
         tabSize: 4,
         insertSpaces: true,
         wordWrap: 'wordWrapColumn',
-        wordWrapColumn: 55,
-        // rulers: [75],
+        wordWrapColumn: getWordWrapColumn(),
         lineNumbers: 'on',
         renderLineHighlight: 'line',
         cursorBlinking: 'smooth',

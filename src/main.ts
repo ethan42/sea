@@ -49,6 +49,14 @@ const elements: Elements = {
     sendInputBtn: $('send-input-btn') as HTMLButtonElement
 };
 
+// Responsive cols based on screen width
+const getCols = (): number => {
+    const width = window.innerWidth;
+    if (width <= 480) return 48;
+    if (width <= 768) return 60;
+    return 80;
+};
+
 // Initialize xterm.js terminal
 const term = new Terminal({
     theme: {
@@ -57,7 +65,7 @@ const term = new Terminal({
         cursor: '#58a6ff',
     },
     rows: 48,
-    cols: 55,
+    cols: getCols(),
     convertEol: true,
     scrollback: 10000,
 });
