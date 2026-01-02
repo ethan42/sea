@@ -57,7 +57,7 @@ const term = new Terminal({
         cursor: '#58a6ff',
     },
     rows: 48,
-    cols: 80,
+    cols: 55,
     convertEol: true,
     scrollback: 10000,
 });
