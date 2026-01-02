@@ -1,11 +1,6 @@
 import { defineConfig } from 'vite';
 import wasm from 'vite-plugin-wasm';
 import topLevelAwait from 'vite-plugin-top-level-await';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   // Base path - change this if deploying to a subdirectory
@@ -51,3 +46,4 @@ export default defineConfig({
     format: 'es'
   }
 });
+

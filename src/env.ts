@@ -1,11 +1,23 @@
 // Compile and run logic for Sea
 import { getEditor } from './editor.js';
 
-class InBrowserEnvironment {
+type TerminalCallback = (message: string, type?: string) => void;
 
-    constructor(terminal) {
-        this.nextResponseId = 0;
-        this.responseCBs = new Map();
+interface ResponseCallback {
+    resolve: (value: any) => void;
+    reject: (error: Error) => void;
+}
+
+class InBrowserEnvironment {
+    private nextResponseId: number = 0;
+    private responseCBs: Map<number, ResponseCallback> = new Map();
+    private worker: Worker;
+    private port: MessagePort;
+    public terminal: TerminalCallback;
+    private skip_newlines: boolean = false;
+    public in_compiling: boolean = false;
+
+    constructor(terminal: TerminalCallback) {
         this.worker = new Worker('worker.js');
         const channel = new MessageChannel();
         this.port = channel.port1;
@@ -20,15 +32,15 @@ class InBrowserEnvironment {
         this.in_compiling = false;
     }
 
-    setShowTiming(value) {
+    setShowTiming(value: boolean): void {
         this.port.postMessage({ id: 'setShowTiming', data: value });
     }
 
-    terminate() {
+    terminate(): void {
         this.worker.terminate();
     }
 
-    runAsync(id, options) {
+    private runAsync(id: string, options: any): Promise<any> {
         const responseId = this.nextResponseId++;
         const responsePromise = new Promise((resolve, reject) => {
             this.responseCBs.set(responseId, { resolve, reject });
@@ -37,20 +49,17 @@ class InBrowserEnvironment {
         return responsePromise;
     }
 
-    compileLinkRun(contents) {
-        // this.port.postMessage({ id: 'compileLinkRun', data: contents });
+    compileLinkRun(contents: string): Promise<any> {
         return this.runAsync('compileLinkRun', contents);
     }
 
-    onmessage(event) {
+    private onmessage(event: MessageEvent): void {
         switch (event.data.id) {
             case 'write':
-                // console.log(event.data.data);
                 this.terminal(event.data.data, 'stdout');
                 break;
 
             case 'runAsync': {
-                // console.log(event);
                 const responseId = event.data.responseId;
                 const promise = this.responseCBs.get(responseId);
                 if (promise) {
@@ -63,15 +72,23 @@ class InBrowserEnvironment {
     }
 }
 
-let env = null;
+let env: InBrowserEnvironment | null = null;
 
-export async function initCompiler(log, setStatus, progressBar, loadingText, loadingSubtext, compilerStatus, runBtn) {
+export async function initCompiler(
+    log: TerminalCallback,
+    setStatus: (status: string) => void,
+    progressBar: HTMLElement,
+    loadingText: HTMLElement,
+    loadingSubtext: HTMLElement,
+    compilerStatus: HTMLElement,
+    runBtn: HTMLButtonElement
+): Promise<void> {
     if (env) return;
     runBtn.disabled = true;
     loadingSubtext.textContent = 'Loading wasm-clang compiler...';
     progressBar.style.width = '30%';
     loadingText.textContent = 'Setting up clang';
-    const devnull = (msg, type) => {};
+    const devnull: TerminalCallback = (msg: string, type?: string) => {};
     env = new InBrowserEnvironment(devnull);
     progressBar.style.width = '40%';
     loadingText.textContent = 'Initializing runtime';
@@ -89,20 +106,29 @@ export async function initCompiler(log, setStatus, progressBar, loadingText, loa
     return;
 }
 
-export async function runCode(log, setStatus, runBtn, stdinInput) {
+export async function runCode(
+    log: TerminalCallback,
+    setStatus: (status: string) => void,
+    runBtn: HTMLButtonElement,
+    stdinInput: HTMLInputElement
+): Promise<void> {
     runBtn.disabled = true;
     setStatus('running');
     const editor = getEditor();
     const code = editor.getValue();
     log('Compiling and running...', 'system');
     try {
-        env.terminal = log;
-        await env.compileLinkRun(code);
+        if (env) {
+            env.terminal = log;
+            await env.compileLinkRun(code);
+        }
         setStatus('ready');
     } catch (error) {
-        log(`Error: ${error.message}`, 'stderr');
+        const err = error as Error;
+        log(`Error: ${err.message}`, 'stderr');
         setStatus('error');
     } finally {
         runBtn.disabled = false;
     }
 }
+

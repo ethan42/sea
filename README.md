@@ -5,15 +5,15 @@
 ## Quick Start
 
 ```bash
-npm run setup    # Install deps & download clang (~30MB, one-time)
-npm run dev      # Start dev server
-npm run build    # Build for production
-npm run preview  # Preview production build
+bun run setup    # Install deps & download clang (~30MB, one-time)
+bun run dev      # Start dev server
+bun run build    # Build for production
+bun run preview  # Preview production build
 ```
 
 ## Build & Deploy
 
-`dist/` contains the static site after `npm run build`. Upload it to any static host (GitHub Pages, Netlify, Vercel, etc).
+`dist/` contains the static site after `bun run build`. Upload it to any static host (GitHub Pages, Netlify, Vercel, etc).
 
 For best performance, set these headers:
 
@@ -26,22 +26,21 @@ If you can't set headers, the service worker will polyfill (may require reload).
 
 ## Dependencies
 
-All dependencies are managed via npm:
+All dependencies are managed via Bun:
 
 | Package         | Purpose                  |
 |-----------------|--------------------------|
 | monaco-editor   | Code editor (VS Code UI) |
 | vite            | Build tool & dev server  |
+| typescript      | Type safety              |
 
 ## Updating Dependencies
 
-## Update Deps
-
 ```bash
-npm outdated      # Check for updates
-npm update        # Update all
-npm install <pkg> # Update specific
-npm run build     # Rebuild
+bun outdated      # Check for updates
+bun update        # Update all
+bun add <pkg>     # Add/update specific package
+bun run build     # Rebuild
 ```
 
 ## Features
@@ -63,6 +62,7 @@ On first load, Clang (~30MB) is downloaded & cached.
 
 ## Requirements
 
+- [Bun](https://bun.sh) (package manager and runtime)
 - Modern browser (WebAssembly, SharedArrayBuffer)
 
 ## License

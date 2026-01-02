@@ -1,14 +1,14 @@
 {
   "name": "sea",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "In-browser C compiler: What you sea is what you get!",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "download-clang": "node scripts/download-clang.js",
-    "setup": "npm install && npm run download-clang"
+    "download-clang": "bun scripts/download-clang.ts",
+    "setup": "bun install && bun run download-clang"
   },
   "dependencies": {
     "monaco-editor": "^0.52.0",
@@ -17,7 +17,9 @@
   "devDependencies": {
     "vite": "^6.0.0",
     "vite-plugin-top-level-await": "^1.4.4",
-    "vite-plugin-wasm": "^3.3.0"
+    "vite-plugin-wasm": "^3.3.0",
+    "typescript": "^5.6.0",
+    "@types/node": "^22.0.0"
   },
   "keywords": [
     "c",

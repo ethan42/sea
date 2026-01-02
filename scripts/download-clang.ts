@@ -1,7 +1,7 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 // Downloads wasm-clang assets from binji.github.io
 
-import { existsSync, mkdirSync, writeFileSync, readFileSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
 const BASE_URL = 'https://raw.githubusercontent.com/ethan42/wasm-clang/refs/heads/master';
@@ -16,7 +16,7 @@ const ASSETS = [
     'worker.js',       // web worker for compilation
 ];
 
-async function downloadFile(filename) {
+async function downloadFile(filename: string): Promise<void> {
     const url = `${BASE_URL}/${filename}`;
     const destPath = join(PUBLIC_DIR, filename);
 
@@ -33,13 +33,13 @@ async function downloadFile(filename) {
     }
 
     const buffer = await response.arrayBuffer();
-    writeFileSync(destPath, Buffer.from(buffer));
+    writeFileSync(destPath, new Uint8Array(buffer));
 
     const sizeMB = (buffer.byteLength / 1024 / 1024).toFixed(2);
     console.log(`    Downloaded ${sizeMB} MB`);
 }
 
-async function main() {
+async function main(): Promise<void> {
     console.log('Setting up wasm-clang assets...\n');
 
     // Create directory
@@ -51,15 +51,17 @@ async function main() {
         try {
             await downloadFile(asset);
         } catch (err) {
-            console.error(`  ✗ Failed to download ${asset}: ${err.message}`);
+            const error = err as Error;
+            console.error(`  ✗ Failed to download ${asset}: ${error.message}`);
         }
     }
 
     console.log('\n✓ Assets downloaded!');
-    console.log(`\nRun 'npm run dev' to start the development server.`);
+    console.log(`\nRun 'bun run dev' to start the development server.`);
 }
 
-main().catch(err => {
+main().catch((err: Error) => {
     console.error('Error:', err.message);
     process.exit(1);
 });
+

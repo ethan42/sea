@@ -5,10 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <title>Sea — In-Browser C Compiler</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Loading overlay -->
@@ -41,34 +37,28 @@
             </div>
 
             <div class="header-actions">
-                <div class="dropdown-container">
-                    <button class="btn btn-secondary" id="examples-btn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-                        </svg>
-                        Examples
-                    </button>
-                    <div class="dropdown-menu" id="examples-dropdown">
+                <button class="btn btn-secondary" id="examples-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                    </svg>
+                    Examples
+                </button>
+
+                <dialog class="examples-dialog" id="examples-dialog">
+                    <div class="dialog-header">
+                        <h2 class="dialog-title">Code Examples</h2>
+                        <button class="btn btn-icon btn-secondary" id="close-dialog-btn" aria-label="Close dialog">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"/>
+                                <line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="dialog-content" id="examples-dropdown">
                         <div class="dropdown-item" data-example="hello">
                             <div class="dropdown-item-title">Hello World</div>
                             <div class="dropdown-item-desc">Basic printf example</div>
-                        </div>
-                        <div class="dropdown-item" data-example="fibonacci">
-                            <div class="dropdown-item-title">Fibonacci</div>
-                            <div class="dropdown-item-desc">Recursive function</div>
-                        </div>
-                        <div class="dropdown-item" data-example="factorial">
-                            <div class="dropdown-item-title">Factorial</div>
-                            <div class="dropdown-item-desc">Iterative &amp; recursive</div>
-                        </div>
-                        <div class="dropdown-item" data-example="arrays">
-                            <div class="dropdown-item-title">Arrays &amp; Sorting</div>
-                            <div class="dropdown-item-desc">Bubble sort implementation</div>
-                        </div>
-                        <div class="dropdown-item" data-example="structs">
-                            <div class="dropdown-item-title">Structures</div>
-                            <div class="dropdown-item-desc">Struct definitions and usage</div>
                         </div>
                         <div class="dropdown-item" data-example="pointers">
                             <div class="dropdown-item-title">Pointers</div>
@@ -82,21 +72,81 @@
                             <div class="dropdown-item-title">Math Functions</div>
                             <div class="dropdown-item-desc">Using math.h</div>
                         </div>
+                        <div class="dropdown-item" data-example="memory">
+                            <div class="dropdown-item-title">Memory Management</div>
+                            <div class="dropdown-item-desc">malloc, calloc, realloc, free</div>
+                        </div>
+                        <div class="dropdown-item" data-example="fibonacci">
+                            <div class="dropdown-item-title">Fibonacci</div>
+                            <div class="dropdown-item-desc">Recursive function</div>
+                        </div>
+                        <div class="dropdown-item" data-example="factorial">
+                            <div class="dropdown-item-title">Factorial</div>
+                            <div class="dropdown-item-desc">Iterative &amp; recursive</div>
+                        </div>
+                        <div class="dropdown-item" data-example="binary-search">
+                            <div class="dropdown-item-title">Binary Search</div>
+                            <div class="dropdown-item-desc">Iterative &amp; recursive search</div>
+                        </div>
+                        <div class="dropdown-item" data-example="primes">
+                            <div class="dropdown-item-title">Prime Numbers</div>
+                            <div class="dropdown-item-desc">Sieve of Eratosthenes</div>
+                        </div>
+                        <div class="dropdown-item" data-example="arrays">
+                            <div class="dropdown-item-title">Arrays &amp; Sorting</div>
+                            <div class="dropdown-item-desc">Bubble sort implementation</div>
+                        </div>
+                        <div class="dropdown-item" data-example="structs">
+                            <div class="dropdown-item-title">Structures</div>
+                            <div class="dropdown-item-desc">Struct definitions and usage</div>
+                        </div>
+                        <div class="dropdown-item" data-example="linked-list">
+                            <div class="dropdown-item-title">Linked List</div>
+                            <div class="dropdown-item-desc">Dynamic linked list operations</div>
+                        </div>
+                        <div class="dropdown-item" data-example="binary-tree">
+                            <div class="dropdown-item-title">Binary Search Tree</div>
+                            <div class="dropdown-item-desc">BST operations and traversals</div>
+                        </div>
+                        <div class="dropdown-item" data-example="tree-traversal">
+                            <div class="dropdown-item-title">Tree Traversal</div>
+                            <div class="dropdown-item-desc">Inorder, preorder, postorder, level-order</div>
+                        </div>
+                        <div class="dropdown-item" data-example="avl-tree">
+                            <div class="dropdown-item-title">AVL Tree</div>
+                            <div class="dropdown-item-desc">Self-balancing binary search tree</div>
+                        </div>
+                        <div class="dropdown-item" data-example="function-pointers">
+                            <div class="dropdown-item-title">Function Pointers</div>
+                            <div class="dropdown-item-desc">Function pointer usage</div>
+                        </div>
+                        <div class="dropdown-item" data-example="macros">
+                            <div class="dropdown-item-title">Preprocessor Macros</div>
+                            <div class="dropdown-item-desc">Macro definitions and usage</div>
+                        </div>
+                        <div class="dropdown-item" data-example="enums">
+                            <div class="dropdown-item-title">Enums</div>
+                            <div class="dropdown-item-desc">Enumeration types and usage</div>
+                        </div>
+                        <div class="dropdown-item" data-example="unions">
+                            <div class="dropdown-item-title">Unions</div>
+                            <div class="dropdown-item-desc">Union types and memory sharing</div>
+                        </div>
                     </div>
-                </div>
+                </dialog>
 
                 <button class="btn btn-secondary" id="clear-btn" title="Clear console (Ctrl+L)">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
                     </svg>
-                    Clear
+                    <span class="btn-text">Clear</span>
                 </button>
 
                 <button class="btn btn-primary" id="run-btn" title="Run (Ctrl+Enter)">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polygon points="5 3 19 12 5 21 5 3"/>
                     </svg>
-                    Run
+                    <span class="btn-text">Run</span>
                 </button>
             </div>
         </header>
@@ -148,6 +198,6 @@
 
     <body>
     <script src="/shared.js"></script>
-    <script type="module" src="/src/main.js"></script>
+    <script type="module" src="/src/main.ts"></script>
 </body>
 </html>

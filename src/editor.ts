@@ -4,7 +4,7 @@ import { EXAMPLES } from './examples.js';
 import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
 
 // Helper to get ?code param from URL
-function getCodeFromQuery() {
+function getCodeFromQuery(): string | null {
     const params = new URLSearchParams(window.location.search);
     const codeParam = params.get('code');
     if (!codeParam) return null;
@@ -17,7 +17,7 @@ function getCodeFromQuery() {
 }
 
 // Helper to set ?code param in URL (without reloading)
-function setCodeInQuery(code) {
+function setCodeInQuery(code: string): void {
     const params = new URLSearchParams(window.location.search);
     if (code) {
         params.set('code', encodeURIComponent(btoa(code)));
@@ -28,17 +28,17 @@ function setCodeInQuery(code) {
     window.history.replaceState({}, '', newUrl);
 }
 
-let editor = null;
+let editor: monaco.editor.IStandaloneCodeEditor | null = null;
 
 // Configure Monaco workers for Vite - required to run compiler / other jobs in workers
-self.MonacoEnvironment = {
+(self as any).MonacoEnvironment = {
     getWorker: function () {
         return new editorWorker();
     }
 };
 
 
-export function initMonaco(runCode, clearConsole) {
+export function initMonaco(runCode: () => void, clearConsole: () => void): void {
     monaco.editor.defineTheme('sea-dark', {
         base: 'vs-dark',
         inherit: true,
@@ -70,11 +70,25 @@ export function initMonaco(runCode, clearConsole) {
     // Use code from ?code param if present, else default
     const initialCode = getCodeFromQuery() ?? EXAMPLES.hello;
 
-    editor = monaco.editor.create(document.getElementById('editor-container'), {
+    const editorContainer = document.getElementById('editor-container');
+    if (!editorContainer) {
+        throw new Error('Editor container not found');
+    }
+
+    // Responsive font size based on screen width
+    const getFontSize = (): number => {
+        const width = window.innerWidth;
+        if (width <= 360) return 10;
+        if (width <= 480) return 11;
+        if (width <= 768) return 12;
+        return 14;
+    };
+
+    editor = monaco.editor.create(editorContainer, {
         value: initialCode,
         language: 'c',
         theme: 'sea-dark',
-        fontSize: 14,
+        fontSize: getFontSize(),
         fontFamily: "'JetBrains Mono', 'Fira Code', Consolas, monospace",
         fontLigatures: true,
         minimap: { enabled: false },
@@ -91,9 +105,19 @@ export function initMonaco(runCode, clearConsole) {
         padding: { top: 12, bottom: 12 },
     });
 
+    // Update font size on window resize
+    const updateFontSize = () => {
+        if (editor) {
+            editor.updateOptions({ fontSize: getFontSize() });
+        }
+    };
+    window.addEventListener('resize', updateFontSize);
+
     // Update ?code param on every change
     editor.onDidChangeModelContent(() => {
-        setCodeInQuery(editor.getValue());
+        if (editor) {
+            setCodeInQuery(editor.getValue());
+        }
     });
 
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
@@ -103,9 +127,13 @@ export function initMonaco(runCode, clearConsole) {
         clearConsole();
     });
 
+    return;
+}
+
+export function getEditor(): monaco.editor.IStandaloneCodeEditor {
+    if (!editor) {
+        throw new Error('Editor not initialized');
+    }
     return editor;
 }
 
-export function getEditor() {
-    return editor;
-}
