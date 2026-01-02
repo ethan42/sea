@@ -87,6 +87,7 @@ export function initMonaco(runCode: () => void, clearConsole: () => void): void 
     // Responsive word wrap column based on screen width
     const getWordWrapColumn = (): number => {
         const width = window.innerWidth;
+        if (width <= 375) return 40;
         if (width <= 480) return 50;
         if (width <= 768) return 55;
         return 80;

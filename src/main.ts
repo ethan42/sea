@@ -52,6 +52,7 @@ const elements: Elements = {
 // Responsive cols based on screen width
 const getCols = (): number => {
     const width = window.innerWidth;
+    if (width <= 375) return 40;
     if (width <= 480) return 48;
     if (width <= 768) return 60;
     return 80;
