@@ -1,6 +1,6 @@
-# Sea — In-Browser C Compiler
+# Sea — In-Browser C Compiler: What you sea is what you get!
 
-> C code editor & compiler running fully in your browser. Powered by Monaco Editor and Clang (via [binji/wasm-clang](https://github.com/binji/wasm-clang)).
+A fully-featured C code editor and compiler that runs entirely in your browser. Uses Monaco Editor and Clang compiled to WebAssembly via Wasmer SDK.
 
 ## Quick Start
 
